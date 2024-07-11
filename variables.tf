@@ -18,6 +18,8 @@ variable "ami_id" {
   default = "ami-04df9ee4d3dfde202"  # Windows AMI us-east-1 from console
 }
 
+
+
 variable "instance_type" {
   default = "t2.micro"
 }

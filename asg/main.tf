@@ -1,17 +1,27 @@
-resource "aws_launch_configuration" "main" {
-  name          = "my-launch-config"
-  image_id      = var.ami_id
-  instance_type = var.instance_type
-  security_groups = [var.launch_configuration_sg]
-  user_data     = file("install_iis.sh")
+resource "aws_ami_from_instance" "ec2-ami" {
+  name               = "iis-ami"
+  source_instance_id = var.ec2_instance_id
+}
 
-  lifecycle {
-    create_before_destroy = true
+resource "aws_launch_template" "iis-LT" {       
+  name                   = "iis-LT"
+  image_id               = aws_ami_from_instance.ec2-ami.id
+  instance_type          = "t2.micro"
+  vpc_security_group_ids = [var.launch_template_sg]
+  tags = {
+    Name = "iis-LT"
   }
 }
 
+# resource "aws_launch_configuration" "main" {
+#   name          = "my-launch-config"
+#   image_id      = aws_ami_from_instance.ec2-ami.id
+#   instance_type = var.instance_type
+#   security_groups = [var.launch_configuration_sg]
+# }
+
 resource "aws_autoscaling_group" "main" {
-  launch_configuration = aws_launch_configuration.main.id
+  launch_configuration = aws_launch_template.iis-LT.id
   min_size              = 2
   max_size              = 2
   desired_capacity      = 2
